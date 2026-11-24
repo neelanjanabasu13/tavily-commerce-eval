@@ -4,16 +4,16 @@ With Black Friday approaching, I wanted to know what happens when a shopper dele
 
 This comparison looks at the evidence the assistant receives **before it writes an answer**. It covers two shopping tasks:
 
-| Where the assistant searches | What the shopper asks it to do | What we checked |
+| Where the assistant searches | What the shopper asks it to do | What I checked |
 |---|---|---|
-| Across the web | Find UK offers for a specific item | Four products, each searched four ways. We checked the retailer, exact item, price and availability in each returned result. |
-| On Vinted UK | Find women’s earmuffs in new condition, from any brand | We examined whether the returned links led to listings or catalogues that respected the shopper’s instructions. |
+| Across the web | Find UK offers for a specific item | Four products, each searched four ways. I checked the retailer, exact item, price and availability in each returned result. |
+| On Vinted UK | Find women’s earmuffs in new condition, from any brand | I examined whether the returned links led to listings or catalogues that respected the shopper’s instructions. |
 
-**What we found:** In the open-web test, asking Tavily to favour UK results increased the number of UK retailer product pages from 6 to 10 out of 20. The number showing a clearly attributable selling price went from 6 to 5. On Vinted, even an explicit request to keep brands open returned a single-brand catalogue first. Both findings matter for an assistant deciding what it can promise a shopper.
+**What I found:** In the open-web test, asking Tavily to favour UK results increased the number of UK retailer product pages from 6 to 10 out of 20. The number showing a clearly attributable selling price went from 6 to 5. On Vinted, even an explicit request to keep brands open returned a single-brand catalogue first. Both findings matter for an assistant deciding what it can promise a shopper.
 
 ## Open-web test: how four questions produced 80 results
 
-On 24 November we tested four UK price searches. We typed **each question four times**, once with each search setting. Each time Tavily returned **five links**. That makes **16 searches and 80 result appearances**. A link appearing under two settings counts twice. The earlier Vinted experiment is separate from those 80.
+On 24 November I tested four UK price searches. I ran **each question four times**, once with each search setting. Each time Tavily returned **five links**. That makes **16 searches and 80 result appearances**. A link appearing under two settings counts twice. The earlier Vinted experiment is separate from those 80.
 
 **How to read the table:** Each cell shows how many of the five results clearly identified the exact product requested. Click a count to see the five original results. Read across a row to compare the settings for the same shopper question.
 
@@ -26,18 +26,18 @@ On 24 November we tested four UK price searches. We typed **each question four t
 
 For example, standard search found the exact LEGO set in four results, yet none of the five links was a UK retailer’s product page. Asking Tavily to favour UK results brought back three such pages. Only John Lewis clearly tied its price to Tiny Plants (£30.99). Finding the right item, finding a UK shop and finding a price you can quote are three separate checks.
 
-## What we compared
+## What I compared
 
-On 24 November 2026 we searched for four products: Barbour Barrhill tartan earmuffs, CeraVe Moisturising Cream 454 g, LEGO Tiny Plants 10329 and a genuine Dyson V8 replacement battery. Every search already included the words **“UK price”**. We kept the wording the same and changed how Tavily searched.
+On 24 November 2026 I searched for four products: Barbour Barrhill tartan earmuffs, CeraVe Moisturising Cream 454 g, LEGO Tiny Plants 10329 and a genuine Dyson V8 replacement battery. Every search already included the words **“UK price”**. I kept the wording the same and changed how Tavily searched.
 
-| Search setting | What changed | What the comparison tells us |
+| Search setting | What changed | Question this setting tests |
 |---|---|---|
 | Standard search | Used Tavily’s basic search. | What does the shopper get just by typing “UK price”? |
 | Favour UK results | Kept basic search and also set the country to the United Kingdom. | Does giving Tavily the country separately help it find UK shops? |
 | Search more deeply | Kept the UK preference and switched to Tavily’s advanced search. | Does spending more search credits improve the results? |
 | Request recent results | Kept basic search and the UK preference, and requested results no more than six hours old. | Does asking for recent information help surface prices or stock? The test did not independently verify the age of each page. |
 
-Each setting returned five results for each of the four products, so **each row below describes 20 results**. Across the four settings we reviewed 80 results, including pages that appeared more than once. We read the title, link and text Tavily returned, which is what a shopping assistant would have available before opening a retailer’s site.
+Each setting returned five results for each of the four products, so **each row below describes 20 results**. Across the four settings I reviewed 80 results, including pages that appeared more than once. I read the title, link and text Tavily returned, which is what a shopping assistant would have available before opening a retailer’s site.
 
 ## What the shopper could learn
 
@@ -51,7 +51,7 @@ Each setting returned five results for each of the four products, so **each row 
 Read the columns separately. For example, LEGO’s US shop matched the exact set and clearly showed a dollar price. It counts in both those columns, but it contributes zero to the UK shop column. A marketplace listing such as eBay is counted separately from a retailer’s own product page.
 
 - **For finding UK shops**, specifying the country helped. UK product pages rose from 6 to 10, even though the shopper had already typed “UK price”. Clear prices fell from 6 to 5 in the same comparison.
-- **For identifying products and prices**, the deeper search performed best on these four questions. It found 17 exact matches and 11 clear prices, compared with 14 and 5 when we only asked it to favour UK results.
+- **For identifying products and prices**, the deeper search performed best on these four questions. It found 17 exact matches and 11 clear prices, compared with 14 and 5 when I only asked it to favour UK results.
 - **For checking availability**, even the recent-results setting gave explicit stock or dispatch information in only 2 of 20 results. For the other 18, the shopper would still need to check. An omitted stock status tells us nothing about whether the item has sold out.
 
 ## Three examples from the returned text
@@ -71,7 +71,7 @@ Read the columns separately. For example, LEGO’s US shop matched the exact set
 | Search more deeply | 8 | 3.24 seconds | 1,108 |
 | Request recent results | 4 | 1.90 seconds | 486 |
 
-Credits are Tavily’s units for charging for searches. The wait includes downloading the results. A token is a small piece of text processed by an AI model. To compare response sizes, we counted all the characters Tavily sent back and divided by four. These estimates describe how much text an assistant would have to read.
+Credits are Tavily’s units for charging for searches. The wait includes downloading the results. A token is a small piece of text processed by an AI model. To compare response sizes, I counted all the characters Tavily sent back and divided by four. These estimates describe how much text an assistant would have to read.
 
 ## The original Vinted search
 
@@ -89,7 +89,7 @@ To test that change, measure how often a result gives a usable UK offer with the
 
 ## Limits and evidence
 
-Four products searched once give a small snapshot. The test measured what the search results supported. Only the merchant can confirm the final price and availability at checkout. We did not test the proposed product changes.
+Four products searched once give a small snapshot. The test measured what the search results supported. Only the merchant can confirm the final price and availability at checkout. I did not test the proposed product changes.
 
 [All 16 original responses](runs/2026-11-24/raw/) · [Scores for all 80 results](runs/2026-11-24/scores.json) · [Request settings, timings and credits](runs/2026-11-24/collect.json)
 
