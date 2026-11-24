@@ -207,7 +207,11 @@ I propose that developers should be able to ask Tavily for specific product attr
 
 ### How should shopping search handle the three cases?
 
-I propose an optional developer setting such as `intent: "shopping"`. When enabled, Tavily would inspect promising destinations, identify the selected product or catalogue filters, and return the facts a shopping assistant needs to answer the request. The following changes address different failures observed in this study.
+I would let a developer declare purchase intent with a proposed setting such as `intent: "shopping"`. Tavily would first identify whether the destination is an individual product listing or a catalogue. It would then read the relevant fields already available in the page’s product data, selected options and visible filters. It would return those labelled facts alongside the source excerpts so the assistant can use them when composing its answer.
+
+For a marketplace such as Vinted, I would start with five fields: **category, brand, condition, price and availability**. For each value, Tavily would record what it describes. For example, `brand = New Era` on an individual listing describes one item. The same value in a catalogue’s active brand filter restricts every item the shopper can see. An instruction to keep brands open permits the individual listing but rules out that catalogue. Similarly, a listing description that mentions “new with tags” does not establish that the entire catalogue is filtered to that condition. When a value cannot be verified, Tavily should mark it unknown.
+
+I would select the initial fields according to the shopping task. For batteries, manufacturer, part number and compatible models matter. For wipes, pack count and wipes per pack matter. The following changes address different failures observed in this study.
 
 | Search | What happened and why I think it happened | What I would change |
 |---|---|---|
