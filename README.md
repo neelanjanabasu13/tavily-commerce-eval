@@ -192,66 +192,60 @@ The open-web comparison covered four products. The Amazon UK pair tested one sho
 
 ## What product and API parameter do I propose?
 
-I would start with developers building cross-retailer shopping and price-comparison assistants. Their immediate decision is whether they have enough evidence to tell a shopper, “This seller offers the exact version you asked for at this price.” I would initially support UK searches where the shopper already knows the product or specifies a pack size. For a question such as “What should I buy a gardener for Christmas?”, a gift guide may be a useful result in its own right. I would evaluate those discovery questions separately.
+I propose that developers should be able to ask Tavily for specific product attributes and for evidence that a product meets a shopper’s requirements. A comparison assistant may need to explain which vacuum cleaner suits a home with a shedding dog and carpeted floors. A purchasing assistant may also need to identify which seller has that exact model in stock within the shopper’s budget. Both tasks depend on identifying the product correctly, but they require different evidence.
 
-### What would the developer request?
+### Which attributes would I support first?
 
-I propose an optional parameter called `include_offer` on Tavily Search. A developer would set it to `true` when the assistant needs to quote a shopping offer. The default would be `false`. The example below illustrates the proposed interface.
-
-```json
-{
-  "query": "WaterWipes Original baby wipes 12 packs of 60 UK price",
-  "include_domains": ["amazon.co.uk"],
-  "include_offer": true
-}
-```
-
-Each result would retain its title, link and excerpt. An additional `offer` object would identify the displayed product and variant, units per pack, number of packs, seller, price, currency and availability when the source supports them. Each populated field would carry a reference to the source text or structured property that supports it. A per-result `fetched_at` would record when Tavily retrieved the source, including the original retrieval time for a cached page. A missing retrieval time would remain unknown.
-
-For example, Amazon UK’s third result in the WaterWipes search explicitly identified 12 packs of 60. The following illustrative response shows what the **saved excerpt alone** supports. Opening the product page could provide additional evidence.
-
-```json
-{
-  "offer": {
-    "brand": "WaterWipes",
-    "pack_count": 12,
-    "units_per_pack": 60,
-    "seller": null,
-    "price": null,
-    "currency": null,
-    "availability": null,
-    "evidence": {
-      "pack_count": "720 Wet Wipes (12 Packs of 60 Wipes)",
-      "units_per_pack": "720 Wet Wipes (12 Packs of 60 Wipes)"
-    }
-  },
-  "fetched_at": null
-}
-```
-
-A result on Amazon UK establishes the website. It takes separate evidence to identify the seller. Likewise, the assistant should quote a price only when the evidence ties it to the same product, pack and seller. For a Black Friday claim such as “30% off”, it would also need evidence for the reference price and any conditions on the discount. The first version would report the supported selling price and leave an unsupported discount unknown.
-
-### What would I build first?
-
-I would prototype offer extraction on the highest-ranked product pages while keeping their ranking fixed. I would first read the product and offer information that a merchant embeds in its page, then check whether the offer belongs to the requested variant. Some merchants identify variants and offers separately in their structured data. A price range covering several sellers cannot by itself establish the selling price for one seller. [Product variant documentation](https://developers.google.com/search/docs/appearance/structured-data/product-variants) · [Offer documentation](https://developers.google.com/search/docs/appearance/structured-data/product-snippet)
-
-The study establishes what was missing or ambiguous in the returned text. It does not establish whether the underlying page contained usable structured data, whether a particular extraction step discarded it, or what proportion of merchants the prototype would cover. I would inspect those pages before estimating coverage or engineering cost.
-
-My experience with quantity data at Amazon informs how I would handle variants. I would preserve the merchant’s original wording alongside a normalised quantity. Twelve packs of 60 gives a total of 720, but the total alone loses the pack configuration. Similarly, 454 grams describes mass and 16 fluid ounces describes volume. I would leave that comparison unresolved without product-specific evidence.
-
-I would handle the Vinted failure separately. An offer extractor cannot fix a result that already links to a single-brand catalogue. In a subsequent ranking experiment, I would test whether demoting brand-filtered catalogue URLs helps when a shopper explicitly requests results across brands. I would continue to allow individual listings from any brand.
-
-### How would I decide whether the feature earns its place in Search?
-
-I would compare three ways of answering the same questions: Search alone, Search followed by a targeted Extract request on the same URLs, and Search with the proposed offer parameter. Tavily Extract already accepts a query that prioritises relevant passages. For the WaterWipes example, the comparison request would ask for the seller, price and availability of the 12-pack of 60. I would have a reviewer record the selected variant and offer from the merchant page at the same time. The 310 seasonal results provide candidate questions for this evaluation and have not yet been scored. [Tavily Extract documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
-
-| Measure | How I would calculate it |
+| Attribute | What I would return and why |
 |---|---|
-| Can the assistant answer the question? | I would measure the proportion of shopping questions with at least one offer in the top five whose product, variant, seller, currency and price agree with the merchant page. When the shopper asks about stock, availability must also agree. |
-| How often does the assistant give a wrong answer? | Among offers the assistant quotes, I would measure the proportion with an incorrect product, variant, seller, price or required availability. I would report missing fields separately so returning unknown cannot disguise poor coverage. |
-| What does a usable answer cost? | I would divide total API credits and model input tokens by the number of questions answered correctly, and compare response times across the three approaches, including the slowest five per cent of requests. |
+| Product name, model and variant | I would identify the exact item described by the source so the assistant can distinguish a vacuum cleaner from its replacement battery, or a four-pack from a twelve-pack. |
+| Brand | I would identify the manufacturer’s brand separately from the retailer or marketplace seller. This would help the assistant distinguish WaterWipes from Amazon’s own brand. |
+| Specifications | I would return named values with their units and preserve the source wording. These could include weight, volume, pack configuration or, for a vacuum cleaner, the supported floor surfaces and the attachments supplied with that model. |
+| Price | I would return the amount and currency together with the seller, variant and any conditions such as a subscription or membership. Those details determine whether two quoted prices are comparable. |
+| Availability | I would distinguish an explicit in-stock, out-of-stock or preorder statement from an unknown status. The source and retrieval time would accompany each offer because availability can change. |
 
-I would proceed if the prototype answered more questions correctly at a comparable error rate, or achieved comparable accuracy with fewer requests, lower cost or shorter waits than Search followed by Extract. If targeted Extract performed equally well on those measures, I would publish that workflow for developers before investing in a dedicated commerce parameter.
+### How would developers express what their users need?
+
+I would test two optional request parameters. With `product_attributes`, developers could choose which facts they want returned for each result. With `requirements`, they could specify what the shopper needs the product to do and distinguish a requirement from a preference. For example, requesting a price asks Tavily to report it. Specifying a maximum price asks Tavily to check whether the exact offer meets that limit. The interface below is a proposal.
+
+```json
+{
+  "query": "Which vacuum cleaners under £300 can remove pet hair from carpet?",
+  "product_attributes": ["identity", "brand", "specifications", "price", "availability"],
+  "requirements": [
+    {"attribute": "price", "operator": "lt", "value": 300, "currency": "GBP", "priority": "required"},
+    {"description": "Can remove pet hair from carpet", "priority": "required"}
+  ]
+}
+```
+
+The response would report product facts separately from seller-specific offers. Each field would identify the exact model or variant it describes, cite the supporting passage or page property, and give the source URL and retrieval time when known. A developer could request price and availability alone for an identified item. The earlier `include_offer` idea would cover that narrower purchase task.
+
+### How would the assistant judge a requirement expressed in everyday language?
+
+For the vacuum question, finding “pet hair” and “carpet” somewhere on the same page is insufficient. The words must describe the same cleaning task and apply to the model being considered. I would return a separate assessment for each requirement, with a status of **supported**, **contradicted** or **unknown**, and identify whether the evidence comes from a manufacturer’s claim or an independent test.
+
+| Illustrative evidence for the exact model | What the assistant could conclude |
+|---|---|
+| The manufacturer says the supplied floor head removes pet hair from carpets. | The manufacturer explicitly supports the requested use. How well the cleaner performs relative to another model remains unknown. |
+| The manual lists a carpet head and separately describes a pet-hair tool for upholstery. | Carpet cleaning and upholstery hair removal are supported individually. Pet-hair removal from carpet remains unknown. |
+| The manual specifies that the cleaner is suitable only for hard floors. | The product contradicts the carpet requirement, even if the seller lists it within budget and in stock. |
+
+These examples illustrate the proposed behaviour. I have not scored vacuum performance in the seasonal dataset. If a shopper asks which vacuum is **best** for pet hair, I would require comparable performance evidence before ranking one model above another on that basis.
+
+### What would I prototype first?
+
+I would begin with exact product identity, the five attribute groups above and a small set of category-specific specifications for vacuum cleaners and packaged consumables. I would keep search rankings fixed initially and extract attributes from merchant product data, specifications and manuals. Existing structured product information can identify variants and offers where publishers provide it. The prototype would measure how often those sources supply sufficient evidence. [Product variant documentation](https://developers.google.com/search/docs/appearance/structured-data/product-variants) · [Offer documentation](https://developers.google.com/search/docs/appearance/structured-data/product-snippet)
+
+My experience with quantity data at Amazon informs how I would compare variants. Twelve packs of 60 wipes and 720 loose wipes have the same count but different pack configurations. An assistant should retain both the total and its composition. It should also preserve units: a mass in grams cannot establish a volume in fluid ounces without additional product-specific information.
+
+The Vinted case raises a separate retrieval question. If a shopper explicitly asks to keep brands open, I would test demoting catalogues restricted to one brand while allowing individual branded listings. Better extraction from a New Era catalogue alone would still leave the shopper with an unnecessarily narrow selection.
+
+### How would I evaluate it?
+
+I would compare Search alone, Search followed by targeted Extract on the same URLs, and the proposed attribute-and-requirement response. Extract already accepts a query that prioritises relevant passages. Reviewers would record what each source establishes for the exact variant and seller, marking gaps explicitly. The 310 seasonal results provide candidate questions, including requests about pet hair and budget, rather than validated performance labels. [Tavily Extract documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
+
+For **comparison questions**, I would measure how often the assistant correctly explains which requirements each candidate satisfies, contradicts or leaves unresolved. For **purchase questions**, I would measure how often at least one of the first five results identifies an exact, available offer that meets the stated requirements and budget. Across both tasks I would track unsupported claims, particularly cases where the assistant converts an unknown into a confident recommendation. I would report coverage, latency and cost per correctly answered question before deciding whether the feature merits a place in Search.
 
 
 ## Individual search results
