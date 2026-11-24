@@ -1,14 +1,17 @@
-# Can a shopping assistant use Tavily to find and price the right product?
+# How well can a shopping assistant answer UK product searches using Tavily?
 
-## The original Vinted search
+With Black Friday approaching, I wanted to know what happens when a shopper delegates a purchase decision to an AI assistant. If you build that assistant and use Tavily to search the web, can you tell the shopper which UK shop carries the exact item, what it costs and whether it is available? A shopper looking for a second-hand item has another requirement: the results should respect their choices about condition and brand.
 
-> women earmufs new with tags or new without tags
+This comparison looks at the evidence the assistant receives **before it writes an answer**. It covers two shopping tasks:
 
-The shopper wanted women’s earmuffs in either of two conditions and left the brand open. In the original test, the shopper reported that the first Vinted page opened with **SHEIN** selected. The original response and filter state were not saved together, so the record cannot establish where that filter came from.
+| Where the assistant searches | What the shopper asks it to do | What we checked |
+|---|---|---|
+| Across the web | Find UK offers for a specific item | Four products, each searched four ways. We checked the retailer, exact item, price and availability in each returned result. |
+| On Vinted UK | Find women’s earmuffs in new condition, from any brand | We examined whether the returned links led to listings or catalogues that respected the shopper’s instructions. |
 
-A recorded follow-up on 23 November used basic search restricted to Vinted UK and explicitly said “keep brand open, don't send me to a single-brand page”. Its first link led to a [New Era earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-klapky-na-usi/brand/232-new-era). The second led to a [general earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-nauszniki). Here the unwanted brand is visible in the first URL itself.
+**What we found:** In the open-web test, asking Tavily to favour UK results increased the number of UK retailer product pages from 6 to 10 out of 20. The number showing a clearly attributable selling price went from 6 to 5. On Vinted, even an explicit request to keep brands open returned a single-brand catalogue first. Both findings matter for an assistant deciding what it can promise a shopper.
 
-## How four questions produced 80 results
+## Open-web test: how four questions produced 80 results
 
 On 24 November we tested four UK price searches. We typed **each question four times**, once with each search setting. Each time Tavily returned **five links**. That makes **16 searches and 80 result appearances**. A link appearing under two settings counts twice. The earlier Vinted experiment is separate from those 80.
 
@@ -70,6 +73,14 @@ Read the columns separately. For example, LEGO’s US shop matched the exact set
 
 Credits are Tavily’s units for charging for searches. The wait includes downloading the results. A token is a small piece of text processed by an AI model. To compare response sizes, we counted all the characters Tavily sent back and divided by four. These estimates describe how much text an assistant would have to read.
 
+## The original Vinted search
+
+> women earmufs new with tags or new without tags
+
+The shopper wanted women’s earmuffs in either of two conditions and left the brand open. In the original test, the shopper reported that the first Vinted page opened with **SHEIN** selected. The original response and filter state were not saved together, so the record cannot establish where that filter came from.
+
+A recorded follow-up on 23 November used basic search restricted to Vinted UK and explicitly said “keep brand open, don't send me to a single-brand page”. Its first link led to a [New Era earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-klapky-na-usi/brand/232-new-era). The second led to a [general earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-nauszniki). Here the unwanted brand is visible in the first URL itself.
+
 ## What Tavily could add
 
 Give the assistant a product name or model, seller, price, currency and stock status, with the exact source words supporting each value. Let it return **“unknown”** for individual details. On Very’s result it could identify set 10329, link to the retailer and leave the price unknown. Include the time Tavily retrieved each page so the shopper can judge how recently the evidence was collected.
@@ -82,4 +93,38 @@ Four products searched once give a small snapshot. The test measured what the se
 
 [All 16 original responses](runs/2026-11-24/raw/) · [Scores for all 80 results](runs/2026-11-24/scores.json) · [Request settings, timings and credits](runs/2026-11-24/collect.json)
 
-To repeat the comparison, use Node.js 22 or later, put your Tavily key in the ignored local `.env` file as `TAVILY_API_KEY`, and run `node run_eval.mjs YYYY-MM-DD` with an unused date. The saved filenames use A, B, C and D for the four settings in table order, and Q1 to Q4 for the four products in the order listed above.
+## Repeat the open-web comparison
+
+1. Clone this repository and enter its directory. Use Node.js 22 or later. The runner needs no additional packages.
+2. Create a local file named `.env` beside `run_eval.mjs` and set `TAVILY_API_KEY=your_key_here`. Git ignores this file.
+3. Run the following command with an unused date. The script preserves existing runs. The original 16 searches used 20 Tavily credits.
+
+```sh
+node run_eval.mjs 2026-11-25
+```
+
+The script sends each of the four queries in the first results table to `POST https://api.tavily.com/search`. It uses these exact settings for every request:
+
+```json
+{"topic":"general","max_results":5,"chunks_per_source":3,"auto_parameters":false,"include_answer":false,"include_raw_content":false,"include_usage":true}
+```
+
+| Setting in the tables | Additional fields sent with each query |
+|---|---|
+| Basic search | `{"search_depth":"basic"}` |
+| Basic, favour UK results | `{"search_depth":"basic","country":"united kingdom"}` |
+| Deeper search, favour UK results | `{"search_depth":"advanced","country":"united kingdom"}` |
+| Basic, favour UK results, request recent pages | `{"search_depth":"basic","country":"united kingdom","max_age_hours":6}` |
+
+The open-web searches leave the domain unrestricted. Each returned response is saved under `runs/<date>/raw/`; `collect.json` records the full request, time taken, status, credits and response size. The script does not retry failed calls. Rankings, stock and prices can change between runs.
+
+**To repeat the scoring**, read each result’s title, URL and returned text. Count a UK retailer product page when a UK shop links to an individual product. Count an exact match when the evidence supports the requested model, size or genuine part. Count a clear price when a selling price can be tied to the displayed item. Count stock when the result explicitly states availability or a dispatch promise. Score these independently; the script collects responses and the original scores were assigned by a reviewer.
+
+## Repeat the Vinted UK check
+
+In the Tavily Search Playground, start with default settings. Select **Basic** search, set **maximum results to 5**, select **no generated answer**, and restrict included domains to **vinted.co.uk**. Run each of the two searches below separately, keeping the same settings. These are the recorded Playground controls; the earlier session did not preserve a full API request for the original search.
+
+1. Original wording, including the spelling: `women earmufs new with tags or new without tags`
+2. Explicit wording: `Earmuffs listings for women, only condition New with tags or New without tags, exclude all other conditions, keep brand open, don't send me to a single-brand page`
+
+For each of the five links, record its rank and URL. Open it and check whether it shows an individual listing, a general category or a single brand. Record any active brand and condition filters separately from the words in the search snippet. This lets another reviewer distinguish a brand already in the URL from a filter that appears only after Vinted opens the page.
