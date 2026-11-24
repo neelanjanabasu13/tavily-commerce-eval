@@ -52,7 +52,7 @@ Read the columns separately. For example, LEGO’s US shop matched the exact set
 
 - **For finding UK shops**, specifying the country helped. UK product pages rose from 6 to 10, even though the shopper had already typed “UK price”. Clear prices fell from 6 to 5 in the same comparison.
 - **For identifying products and prices**, the deeper search performed best on these four questions. It found 17 exact matches and 11 clear prices, compared with 14 and 5 when I only asked it to favour UK results.
-- **For checking availability**, even the recent-results setting gave explicit stock or dispatch information in only 2 of 20 results. For the other 18, the shopper would still need to check. An omitted stock status tells us nothing about whether the item has sold out.
+- **For checking availability**, even the recent-results setting gave explicit stock or dispatch information in only 2 of 20 results. For the other 18, the shopper would still need to check. When stock information is missing, availability is unknown.
 
 ## Three examples from the returned text
 
@@ -77,7 +77,7 @@ Credits are Tavily’s units for charging for searches. The wait includes downlo
 
 > women earmufs new with tags or new without tags
 
-The shopper wanted women’s earmuffs in either of two conditions and left the brand open. In the original test, the shopper reported that the first Vinted page opened with **SHEIN** selected. The original response and filter state were not saved together, so the record cannot establish where that filter came from.
+The shopper wanted women’s earmuffs in either of two conditions and left the brand open. In the original test, I saw the first Vinted page open with **SHEIN** selected. The original response and filter state were not saved together, so the record cannot establish where that filter came from.
 
 A recorded follow-up on 23 November used basic search restricted to Vinted UK and explicitly said “keep brand open, don't send me to a single-brand page”. Its first link led to a [New Era earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-klapky-na-usi/brand/232-new-era). The second led to a [general earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-nauszniki). Here the unwanted brand is visible in the first URL itself.
 
@@ -118,7 +118,7 @@ The script sends each of the four queries in the first results table to `POST ht
 
 The open-web searches leave the domain unrestricted. Each returned response is saved under `runs/<date>/raw/`; `collect.json` records the full request, time taken, status, credits and response size. The script does not retry failed calls. Rankings, stock and prices can change between runs.
 
-**To repeat the scoring**, read each result’s title, URL and returned text. Count a UK retailer product page when a UK shop links to an individual product. Count an exact match when the evidence supports the requested model, size or genuine part. Count a clear price when a selling price can be tied to the displayed item. Count stock when the result explicitly states availability or a dispatch promise. Score these independently; the script collects responses and the original scores were assigned by a reviewer.
+**To repeat the scoring**, read each result’s title, URL and returned text. Count a UK retailer product page when a UK shop links to an individual product. Count an exact match when the evidence supports the requested model, size or genuine part. Count a clear price when a selling price can be tied to the displayed item. Count stock when the result explicitly states availability or a dispatch promise. Score these independently; the script collects responses and I scored the original results.
 
 ## Repeat the Vinted UK check
 
