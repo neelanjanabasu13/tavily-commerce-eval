@@ -43,6 +43,17 @@ Each cell shows how many of the five results clearly identified the exact produc
 | LEGO Botanicals Tiny Plants 10329 UK price | [4 of 5](runs/2026-11-24/raw/depth-basic_country-none_Q3.json) | [5 of 5](runs/2026-11-24/raw/depth-basic_country-united-kingdom_Q3.json) | [5 of 5](runs/2026-11-24/raw/depth-advanced_country-united-kingdom_Q3.json) | [5 of 5](runs/2026-11-24/raw/depth-basic_country-united-kingdom_max-age-6h_Q3.json) |
 | Dyson V8 genuine replacement battery UK price | [1 of 5](runs/2026-11-24/raw/depth-basic_country-none_Q4.json) | [1 of 5](runs/2026-11-24/raw/depth-basic_country-united-kingdom_Q4.json) | [2 of 5](runs/2026-11-24/raw/depth-advanced_country-united-kingdom_Q4.json) | [0 of 5](runs/2026-11-24/raw/depth-basic_country-united-kingdom_max-age-6h_Q4.json) |
 
+### Which results account for the missing marks?
+
+A score of **4 of 5** means four returned pages clearly identified the requested product under the original scoring rules. The fifth could be a different product, a company profile or a plausible match with incomplete evidence. A score of **5 of 5** means all five identified the product. Prices, UK sellers and stock are assessed separately.
+
+| Product | Which results fell short of an exact match? |
+|---|---|
+| Barbour Barrhill tartan earmuffs | With **Basic** search and **Country = United Kingdom**, links 1–4 identified the earmuffs. Link 5 was a [profile of Barbour as a company](https://tavily.com/knowledge/company/BRDbZT7NKy1v). It did not identify the earmuffs. All five results identified them in each of the other three settings. |
+| CeraVe Moisturising Cream 454 g | With **Basic** search and **Country = United Kingdom**, link 4 was [CeraVe’s 454 g refill](https://www.cerave.co.uk/skincare/moisturisers/moisturizing-cream-refill). The original scoring treated the refill as a different packaging variant. The query specified the weight but did not say “tub”, so this is a judgement call. If refills qualify, all five identified the requested cream and weight. With **Basic** search and **Country = None**, the refill and a mixed-size eBay catalogue accounted for the two partial matches. |
+| LEGO Tiny Plants 10329 | With **Basic** search and **Country = None**, link 5 was a profile of the LEGO Group. The other four identified set 10329, including reviews and the US LEGO shop. That explains how the search could score 4 of 5 for product identity and still return zero UK retailer product pages. |
+| Genuine Dyson V8 battery | The four settings yielded 1, 1, 2 and 0 exact matches respectively. “Compatible with V8” established fit but did not establish genuine Dyson manufacture. Conversely, a genuine Dyson part without evidence of V8 compatibility was only a partial match. The next table explains each link in the Basic UK search. |
+
 For example, standard search found the exact LEGO set in four results, yet none of the five links was a UK retailer’s product page. Asking Tavily to favour UK results brought back three such pages. Only John Lewis clearly tied its price to Tiny Plants (£30.99). Finding the right item, finding a UK shop and finding a price you can quote are three separate checks.
 
 ### Which settings did I change?
