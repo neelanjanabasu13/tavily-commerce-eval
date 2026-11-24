@@ -1,8 +1,27 @@
 # Can a shopping assistant use Tavily to find and price the right product?
 
-A UK shopper wants LEGO Tiny Plants, set **10329**. Tavily’s standard search returned five links, including LEGO’s US shop and two YouTube videos. When we told Tavily to favour UK results, three of the five links were UK retailers selling the set. **Only one of those three, John Lewis, showed a price the assistant could confidently quote for that set: £30.99.**
+## The original Vinted search
 
-That distinction matters for a shopper. A link can take you to the right shop even when the text returned by search gives too little evidence to answer “How much is it?”
+> women earmufs new with tags or new without tags
+
+The shopper wanted women’s earmuffs in either of two conditions and left the brand open. In the original test, the shopper reported that the first Vinted page opened with **SHEIN** selected. The original response and filter state were not saved together, so the record cannot establish where that filter came from.
+
+A recorded follow-up on 23 November used basic search restricted to Vinted UK and explicitly said “keep brand open, don't send me to a single-brand page”. Its first link led to a [New Era earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-klapky-na-usi/brand/232-new-era). The second led to a [general earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-nauszniki). Here the unwanted brand is visible in the first URL itself.
+
+## How four questions produced 80 results
+
+On 24 November we tested four UK price searches. We typed **each question four times**, once with each search setting. Each time Tavily returned **five links**. That makes **16 searches and 80 result appearances**. A link appearing under two settings counts twice. The earlier Vinted experiment is separate from those 80.
+
+**How to read the table:** Each cell shows how many of the five results clearly identified the exact product requested. Click a count to see the five original results. Read across a row to compare the settings for the same shopper question.
+
+| Exact words typed | Basic search | Basic, favour UK results | Deeper search, favour UK results | Basic, favour UK results, request pages from last 6 hours |
+|---|---:|---:|---:|---:|
+| Barbour Barrhill tartan earmuffs UK price | [5 of 5](runs/2026-11-24/raw/A_baseline_Q1.json) | [4 of 5](runs/2026-11-24/raw/B_uk_boost_Q1.json) | [5 of 5](runs/2026-11-24/raw/C_advanced_uk_Q1.json) | [5 of 5](runs/2026-11-24/raw/D_fresh_uk_Q1.json) |
+| CeraVe Moisturising Cream 454g UK price | [3 of 5](runs/2026-11-24/raw/A_baseline_Q2.json) | [4 of 5](runs/2026-11-24/raw/B_uk_boost_Q2.json) | [5 of 5](runs/2026-11-24/raw/C_advanced_uk_Q2.json) | [5 of 5](runs/2026-11-24/raw/D_fresh_uk_Q2.json) |
+| LEGO Botanicals Tiny Plants 10329 UK price | [4 of 5](runs/2026-11-24/raw/A_baseline_Q3.json) | [5 of 5](runs/2026-11-24/raw/B_uk_boost_Q3.json) | [5 of 5](runs/2026-11-24/raw/C_advanced_uk_Q3.json) | [5 of 5](runs/2026-11-24/raw/D_fresh_uk_Q3.json) |
+| Dyson V8 genuine replacement battery UK price | [1 of 5](runs/2026-11-24/raw/A_baseline_Q4.json) | [1 of 5](runs/2026-11-24/raw/B_uk_boost_Q4.json) | [2 of 5](runs/2026-11-24/raw/C_advanced_uk_Q4.json) | [0 of 5](runs/2026-11-24/raw/D_fresh_uk_Q4.json) |
+
+For example, standard search found the exact LEGO set in four results, yet none of the five links was a UK retailer’s product page. Asking Tavily to favour UK results brought back three such pages. Only John Lewis clearly tied its price to Tiny Plants (£30.99). Finding the right item, finding a UK shop and finding a price you can quote are three separate checks.
 
 ## What we compared
 
