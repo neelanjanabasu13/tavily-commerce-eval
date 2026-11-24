@@ -1,38 +1,66 @@
-# Tavily UK shopping discovery
+# Can a shopping assistant use Tavily to find and price the right product?
 
-Can existing Tavily Search parameters support an AI shopping discovery agent, or is the gap structured offer extraction?
+A UK shopper wants LEGO Tiny Plants, set **10329**. Tavily’s standard search returned five links, including LEGO’s US shop and two YouTube videos. When we told Tavily to favour UK results, three of the five links were UK retailers selling the set. **Only one of those three, John Lewis, showed a price the assistant could confidently quote for that set: £30.99.**
 
-**For LEGO 10329, the UK boost moved UK retailer product pages from 0/5 to 3/5. Only John Lewis supplied a price clearly attributable to the set among those three.** Across all four shopping queries, the advanced and six-hour arms tied for the most UK retailer product pages. Source retrieval and assigning the right price to an item are separate decisions.
+That distinction matters for a shopper. A link can take you to the right shop even when the text returned by search gives too little evidence to answer “How much is it?”
 
-| Arm | Credits/4Q | Avg latency | Avg payload tokens | UK retailer PDPs (of 20) | Exact product + variant | Clean price | Stock shown |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| A_baseline | 4 | 1.11 s | 1627 | 6 | 13 | 6 | 2 |
-| B_uk_boost | 4 | 1.29 s | 1522 | 10 | 14 | 5 | 1 |
-| C_advanced_uk | 8 | 3.24 s | 1108 | 12 | 17 | 11 | 2 |
-| D_fresh_uk | 4 | 1.90 s | 486 | 12 | 15 | 7 | 2 |
+## What we compared
 
-Each quality column is an independent count across 20 ranked results. Clean price can include a foreign price or a marketplace listing. Stock shown means explicit availability, including a dated dispatch promise. Latency includes downloading the response. Token estimates cover the whole response body.
+On 24 November 2026 we searched for four products: Barbour Barrhill tartan earmuffs, CeraVe Moisturising Cream 454 g, LEGO Tiny Plants 10329 and a genuine Dyson V8 replacement battery. Every search already included the words **“UK price”**. We kept the wording the same and changed how Tavily searched.
 
-## Three failures an agent would have to handle
+| Search setting | What changed | What the comparison tells us |
+|---|---|---|
+| Standard search | Used Tavily’s basic search. | What does the shopper get just by typing “UK price”? |
+| Favour UK results | Kept basic search and also set the country to the United Kingdom. | Does giving Tavily the country separately help it find UK shops? |
+| Search more deeply | Kept the UK preference and switched to Tavily’s advanced search. | Does spending more search credits improve the results? |
+| Request recent results | Kept basic search and the UK preference, and requested results no more than six hours old. | Does asking for recent information help surface prices or stock? The test did not independently verify the age of each page. |
 
-- Very names a different LEGO set beside the sale price. Assigning £16.99 to Tiny Plants would require more evidence. “Save for later LEGO Speed Champions Dodge Challenger SRT Hellcat Sports Car 77237.” [Source](https://www.very.co.uk/lego-botanical-tiny-plants-flowers-set-10329/1600952505.prd) · B_uk_boost, Q3, rank 2
-- Millbry Hill gives the recommended retail price. The selling price is unknown. “Classic Tartan RRP £34.96” [Source](https://millbryhill.co.uk/products/barbour-ladies-barrhill-tartan-ear-muffs-green-check) · D_fresh_uk, Q1, rank 1
-- The eBay seller claims compatibility. The snippet leaves genuine Dyson manufacture unverified. “These are new 4000 mAH batteries compatible with Dyson V7 and V8 models where the batteries are secured by screws.” [Source](https://www.ebay.co.uk/itm/305371741036) · D_fresh_uk, Q4, rank 1
+Each setting returned five results for each of the four products, so **each row below describes 20 results**. Across the four settings we reviewed 80 results, including pages that appeared more than once. We read the title, link and text Tavily returned, which is what a shopping assistant would have available before opening a retailer’s site.
 
-## Reproduce and audit
+## What the shopper could learn
 
-Use Node 22+ and place `TAVILY_API_KEY` in the ignored local `.env`. Run `node run_eval.mjs YYYY-MM-DD` with an unused run date. The default is 2026-11-24. The script makes 16 requests without retries and preserves HTTP errors, including 434. The reported 20 credits cover the benchmark only.
+| Search setting | UK shop pages for an individual product | Matched the exact product requested | Showed a clear selling price for the item displayed | Stated stock or dispatch information |
+|---|---:|---:|---:|---:|
+| Standard search | 6 | 13 | 6 | 2 |
+| Favour UK results | 10 | 14 | 5 | 1 |
+| Search more deeply | 12 | 17 | 11 | 2 |
+| Request recent results | 12 | 15 | 7 | 2 |
 
-Compare B with A for country, C with B for depth, and D with B for requested six-hour freshness. All four queries already include “UK price”. Query order is fixed; arm order rotates. [Requests and timings](runs/2026-11-24/collect.json) · [Verbatim responses](runs/2026-11-24/raw/) · [All 80 judgements](runs/2026-11-24/scores.json)
+Read the columns separately. For example, LEGO’s US shop matched the exact set and clearly showed a dollar price. It counts in both those columns, but it contributes zero to the UK shop column. A marketplace listing such as eBay is counted separately from a retailer’s own product page.
 
-Score only the returned title, URL and content. UK requires positive storefront or market evidence. Partial includes mixed variants, refill-only packaging and unverified authenticity. Product match covers the named model and size, independently of merchant or price. Category includes comparison pages and product selectors. Marketplace takes precedence over page layout. Editorial includes company profiles and reviews. A clean price must bind to the displayed item or a clearly identified offer. Exclude shipping, RRP alone and prices for other products. Generic delivery policies do not establish stock.
+- **For finding UK shops**, specifying the country helped. UK product pages rose from 6 to 10, even though the shopper had already typed “UK price”. Clear prices fell from 6 to 5 in the same comparison.
+- **For identifying products and prices**, the deeper search performed best on these four questions. It found 17 exact matches and 11 clear prices, compared with 14 and 5 when we only asked it to favour UK results.
+- **For checking availability**, even the recent-results setting gave explicit stock or dispatch information in only 2 of 20 results. For the other 18, the shopper would still need to check. An omitted stock status tells us nothing about whether the item has sold out.
 
-## Product proposal
+## Three examples from the returned text
 
-1. Return per-result `fetched_at` so an agent can show when the source was retrieved.
-2. Offer optional fields for product ID, variant, seller, price, currency and availability, each linked to its source excerpt.
-3. Emit `"unknown"` when the excerpt cannot resolve a field. For the Very result, retain set 10329 and abstain on its price.
+| Shopper’s question | What Tavily returned | What the assistant can safely say |
+|---|---|---|
+| Is Very selling LEGO Tiny Plants for £16.99? | The page title identifies Tiny Plants 10329. The text includes £16.99 beside “Save for later LEGO Speed Champions Dodge Challenger SRT Hellcat Sports Car 77237.” | Very has a page for Tiny Plants. The returned text leaves it unclear which set costs £16.99. [Very](https://www.very.co.uk/lego-botanical-tiny-plants-flowers-set-10329/1600952505.prd) |
+| What does Millbry Hill charge for the Barbour earmuffs? | “Classic Tartan RRP £34.96” | £34.96 is the recommended retail price. The shop’s selling price is unknown from this result. [Millbry Hill](https://millbryhill.co.uk/products/barbour-ladies-barrhill-tartan-ear-muffs-green-check) |
+| Is this eBay battery a genuine Dyson part? | “These are new 4000 mAH batteries compatible with Dyson V7 and V8 models where the batteries are secured by screws.” | The seller says the battery fits certain V8 models. Who manufactured it remains unclear. [eBay](https://www.ebay.co.uk/itm/305371741036) |
 
-Measure useful-offer rate (exact UK offers with supported price and availability / results), hard-fail rate (asserted offers contradicted by merchant evidence / asserted offers), abstention rate (required fields marked unknown / required fields), and total payload tokens per usable answer.
+## What each setting cost and how long it took
 
-Four queries on one date provide a directional diagnostic. One reviewer's judgements, repeated URLs and live ranking variation limit generalisation. A successful freshness request does not independently verify page age. Retrieval time also differs from a merchant's last price update. Live checkout price and availability remain merchant-owned.
+| Search setting | Tavily credits used for all four searches | Average wait for one complete response | Average amount of text returned per search, in estimated tokens |
+|---|---:|---:|---:|
+| Standard search | 4 | 1.11 seconds | 1,627 |
+| Favour UK results | 4 | 1.29 seconds | 1,522 |
+| Search more deeply | 8 | 3.24 seconds | 1,108 |
+| Request recent results | 4 | 1.90 seconds | 486 |
+
+Credits are Tavily’s units for charging for searches. The wait includes downloading the results. A token is a small piece of text processed by an AI model. To compare response sizes, we counted all the characters Tavily sent back and divided by four. These estimates describe how much text an assistant would have to read.
+
+## What Tavily could add
+
+Give the assistant a product name or model, seller, price, currency and stock status, with the exact source words supporting each value. Let it return **“unknown”** for individual details. On Very’s result it could identify set 10329, link to the retailer and leave the price unknown. Include the time Tavily retrieved each page so the shopper can judge how recently the evidence was collected.
+
+To test that change, measure how often a result gives a usable UK offer with the right item, price and availability; how often a claim disagrees with the retailer; and how often a detail is marked unknown. Also track how much text the assistant has to read for each usable answer.
+
+## Limits and evidence
+
+Four products searched once give a small snapshot. The test measured what the search results supported. Only the merchant can confirm the final price and availability at checkout. We did not test the proposed product changes.
+
+[All 16 original responses](runs/2026-11-24/raw/) · [Scores for all 80 results](runs/2026-11-24/scores.json) · [Request settings, timings and credits](runs/2026-11-24/collect.json)
+
+To repeat the comparison, use Node.js 22 or later, put your Tavily key in the ignored local `.env` file as `TAVILY_API_KEY`, and run `node run_eval.mjs YYYY-MM-DD` with an unused date. The saved filenames use A, B, C and D for the four settings in table order, and Q1 to Q4 for the four products in the order listed above.
