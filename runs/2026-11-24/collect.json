@@ -1,6 +1,6 @@
 [
   {
-    "arm": "A_baseline",
+    "arm": "depth-basic_country-none",
     "qid": "Q1",
     "request": {
       "query": "Barbour Barrhill tartan earmuffs UK price",
@@ -22,7 +22,7 @@
     "error": null
   },
   {
-    "arm": "B_uk_boost",
+    "arm": "depth-basic_country-united-kingdom",
     "qid": "Q1",
     "request": {
       "query": "Barbour Barrhill tartan earmuffs UK price",
@@ -45,7 +45,7 @@
     "error": null
   },
   {
-    "arm": "C_advanced_uk",
+    "arm": "depth-advanced_country-united-kingdom",
     "qid": "Q1",
     "request": {
       "query": "Barbour Barrhill tartan earmuffs UK price",
@@ -68,7 +68,7 @@
     "error": null
   },
   {
-    "arm": "D_fresh_uk",
+    "arm": "depth-basic_country-united-kingdom_max-age-6h",
     "qid": "Q1",
     "request": {
       "query": "Barbour Barrhill tartan earmuffs UK price",
@@ -92,7 +92,7 @@
     "error": null
   },
   {
-    "arm": "B_uk_boost",
+    "arm": "depth-basic_country-united-kingdom",
     "qid": "Q2",
     "request": {
       "query": "CeraVe Moisturising Cream 454g UK price",
@@ -115,7 +115,7 @@
     "error": null
   },
   {
-    "arm": "C_advanced_uk",
+    "arm": "depth-advanced_country-united-kingdom",
     "qid": "Q2",
     "request": {
       "query": "CeraVe Moisturising Cream 454g UK price",
@@ -138,7 +138,7 @@
     "error": null
   },
   {
-    "arm": "D_fresh_uk",
+    "arm": "depth-basic_country-united-kingdom_max-age-6h",
     "qid": "Q2",
     "request": {
       "query": "CeraVe Moisturising Cream 454g UK price",
@@ -162,7 +162,7 @@
     "error": null
   },
   {
-    "arm": "A_baseline",
+    "arm": "depth-basic_country-none",
     "qid": "Q2",
     "request": {
       "query": "CeraVe Moisturising Cream 454g UK price",
@@ -184,7 +184,7 @@
     "error": null
   },
   {
-    "arm": "C_advanced_uk",
+    "arm": "depth-advanced_country-united-kingdom",
     "qid": "Q3",
     "request": {
       "query": "LEGO Botanicals Tiny Plants 10329 UK price",
@@ -207,7 +207,7 @@
     "error": null
   },
   {
-    "arm": "D_fresh_uk",
+    "arm": "depth-basic_country-united-kingdom_max-age-6h",
     "qid": "Q3",
     "request": {
       "query": "LEGO Botanicals Tiny Plants 10329 UK price",
@@ -231,7 +231,7 @@
     "error": null
   },
   {
-    "arm": "A_baseline",
+    "arm": "depth-basic_country-none",
     "qid": "Q3",
     "request": {
       "query": "LEGO Botanicals Tiny Plants 10329 UK price",
@@ -253,7 +253,7 @@
     "error": null
   },
   {
-    "arm": "B_uk_boost",
+    "arm": "depth-basic_country-united-kingdom",
     "qid": "Q3",
     "request": {
       "query": "LEGO Botanicals Tiny Plants 10329 UK price",
@@ -276,7 +276,7 @@
     "error": null
   },
   {
-    "arm": "D_fresh_uk",
+    "arm": "depth-basic_country-united-kingdom_max-age-6h",
     "qid": "Q4",
     "request": {
       "query": "Dyson V8 genuine replacement battery UK price",
@@ -300,7 +300,7 @@
     "error": null
   },
   {
-    "arm": "A_baseline",
+    "arm": "depth-basic_country-none",
     "qid": "Q4",
     "request": {
       "query": "Dyson V8 genuine replacement battery UK price",
@@ -322,7 +322,7 @@
     "error": null
   },
   {
-    "arm": "B_uk_boost",
+    "arm": "depth-basic_country-united-kingdom",
     "qid": "Q4",
     "request": {
       "query": "Dyson V8 genuine replacement battery UK price",
@@ -345,7 +345,7 @@
     "error": null
   },
   {
-    "arm": "C_advanced_uk",
+    "arm": "depth-advanced_country-united-kingdom",
     "qid": "Q4",
     "request": {
       "query": "Dyson V8 genuine replacement battery UK price",

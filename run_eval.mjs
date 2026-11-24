@@ -12,10 +12,10 @@ const queries = [
 ];
 const uk = { country: 'united kingdom' };
 const arms = {
-  A_baseline: { search_depth: 'basic' },
-  B_uk_boost: { search_depth: 'basic', ...uk },
-  C_advanced_uk: { search_depth: 'advanced', ...uk },
-  D_fresh_uk: { search_depth: 'basic', ...uk, max_age_hours: 6 }
+  depth-basic_country-none: { search_depth: 'basic' },
+  depth-basic_country-united-kingdom: { search_depth: 'basic', ...uk },
+  depth-advanced_country-united-kingdom: { search_depth: 'advanced', ...uk },
+  depth-basic_country-united-kingdom_max-age-6h: { search_depth: 'basic', ...uk, max_age_hours: 6 }
 };
 const fixed = {
   topic: 'general', max_results: 5, chunks_per_source: 3,
