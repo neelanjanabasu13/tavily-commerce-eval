@@ -1,6 +1,6 @@
-# How well can a shopping assistant answer UK product searches using Tavily?
+# UK shopping with Tavily: open-web search, Amazon UK and Vinted UK
 
-With Black Friday approaching, I wanted to know what happens when a shopper delegates a purchase decision to an AI assistant. If you build that assistant and use Tavily to search the web, can you tell the shopper which UK shop carries the exact item, what it costs and whether it is available? A shopper looking for a second-hand item has another requirement: the results should respect their choices about condition and brand.
+With Black Friday approaching, I wanted to know which shopping questions an AI assistant could answer from Tavily’s search results. Across the web, could it identify a UK seller and a price for an exact product? On Amazon UK, could it find the requested brand and pack size? On Vinted UK, could it respect a shopper’s condition and brand preferences?
 
 This comparison looks at the evidence the assistant receives **before it writes an answer**. It covers three shopping tasks:
 
@@ -10,7 +10,11 @@ This comparison looks at the evidence the assistant receives **before it writes 
 | On Amazon UK | Find a specific brand and pack of baby wipes | I compared the same query with the website field blank and restricted to Amazon UK. |
 | On Vinted UK | Find women’s earmuffs in new condition, from any brand | I examined whether the returned links led to listings or catalogues that respected the shopper’s instructions. |
 
-**What I found:** In the open-web test, asking Tavily to favour UK results increased the number of UK retailer product pages from 6 to 10 out of 20. The number showing a clearly attributable selling price went from 6 to 5. On Vinted, even an explicit request to keep brands open returned a single-brand catalogue first. Both findings matter for an assistant deciding what it can promise a shopper.
+**What I found**
+
+- **Open web.** Setting Country to United Kingdom increased UK retailer product pages from 6 to 10 out of 20. Results with a clear price fell from 6 to 5.
+- **Amazon UK.** Restricting the website to amazon.co.uk moved Amazon UK links from 0 to 10 out of 10. The results still included a different brand and a four-pack, and none of the ten excerpts showed a £ price.
+- **Vinted UK.** The shopper wanted new earmuffs and left the brand open. Even after I explicitly asked to avoid single-brand pages, the first link led to the New Era catalogue.
 
 ## Open-web test: how four questions produced 80 results
 
@@ -90,15 +94,7 @@ Read the columns separately. For example, LEGO’s US shop matched the exact set
 
 Credits are Tavily’s units for charging for searches. The wait includes downloading the results. A token is a small piece of text processed by an AI model. To compare response sizes, I counted all the characters Tavily sent back and divided by four. These estimates describe how much text an assistant would have to read.
 
-## The original Vinted search
-
-> women earmufs new with tags or new without tags
-
-The shopper wanted women’s earmuffs in either of two conditions and left the brand open. In the original test, I saw the first Vinted page open with **SHEIN** selected. The original response and filter state were not saved together, so the record cannot establish where that filter came from.
-
-A recorded follow-up on 23 November used basic search restricted to Vinted UK and explicitly said “keep brand open, don't send me to a single-brand page”. Its first link led to a [New Era earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-klapky-na-usi/brand/232-new-era). The second led to a [general earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-nauszniki). Here the unwanted brand is visible in the first URL itself.
-
-## Amazon UK: what happens when I restrict the website?
+## Amazon UK case study · website, brand and pack size
 
 I chose baby wipes because Amazon identifies them among its frequently purchased UK essentials. The published figures cover groceries and household essentials together; they do not establish a single top-selling category. [Amazon’s UK sales figures](https://www.aboutamazon.co.uk/news/retail/amazon-uk-grocery-sales-growth-essentials)
 
@@ -115,6 +111,14 @@ The website restriction worked on all ten links in this pair. To recommend an of
 
 Playground request IDs: `16943416-86f9-4bf7-839c-77018133b24c` (open web) and `202baf11-03ee-410d-95da-210351a079fc` (Amazon only).
 
+## Vinted UK case study · condition and brand
+
+> women earmufs new with tags or new without tags
+
+The shopper wanted women’s earmuffs in either of two conditions and left the brand open. In the original test, I saw the first Vinted page open with **SHEIN** selected. The original response and filter state were not saved together, so the record cannot establish where that filter came from.
+
+A recorded follow-up on 23 November used basic search restricted to Vinted UK and explicitly said “keep brand open, don't send me to a single-brand page”. Its first link led to a [New Era earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-klapky-na-usi/brand/232-new-era). The second led to a [general earmuffs catalogue](https://www.vinted.co.uk/catalog/2935-nauszniki). Here the unwanted brand is visible in the first URL itself.
+
 ## What Tavily could add
 
 Give the assistant a product name or model, seller, price, currency and stock status, with the exact source words supporting each value. Let it return **“unknown”** for individual details. On Very’s result it could identify set 10329, link to the retailer and leave the price unknown. Include the time Tavily retrieved each page so the shopper can judge how recently the evidence was collected.
@@ -123,7 +127,7 @@ To test that change, measure how often a result gives a usable UK offer with the
 
 ## Limits and evidence
 
-Four products searched once give a small snapshot. The test measured what the search results supported. Only the merchant can confirm the final price and availability at checkout. I did not test the proposed product changes.
+The open-web comparison covered four products. The Amazon UK pair tested one shopping question twice. The Vinted UK case compared wording on one shopping intent, with an incomplete record of the original search. The test measured what the search results supported. Only the merchant can confirm the final price and availability at checkout. I did not test the proposed product changes.
 
 [All 16 original responses](runs/2026-11-24/raw/) · [Scores for all 80 results](runs/2026-11-24/scores.json) · [Request settings, timings and credits](runs/2026-11-24/collect.json)
 
@@ -153,6 +157,13 @@ The script sends each of the four queries in the first results table to `POST ht
 The open-web searches leave the domain unrestricted. Each returned response is saved under `runs/<date>/raw/`; `collect.json` records the full request, time taken, status, credits and response size. The script does not retry failed calls. Rankings, stock and prices can change between runs.
 
 **To repeat the scoring**, read each result’s title, URL and returned text. Count a UK retailer product page when a UK shop links to an individual product. Count an exact match when the evidence supports the requested model, size or genuine part. Count a clear price when a selling price can be tied to the displayed item. Count stock when the result explicitly states availability or a dispatch promise. Score these independently; the script collects responses and I scored the original results.
+
+## Repeat the Amazon UK check
+
+1. In the Tavily Search Playground, enter `WaterWipes Original baby wipes 12 packs of 60 UK price`.
+2. Select **Search depth = Advanced**, **Country = None**, **Topic = General**, **Max results = 10**, **Chunks per source = 3** and **Include answer = None**.
+3. Leave **Include domains** blank and send the request. Save the response. Enter **amazon.co.uk** in **Include domains** and send the same request again.
+4. In each response, count the Amazon UK links. For each link, check the brand, the number of packs, the wipes per pack and whether the returned text gives a £ price tied to that pack.
 
 ## Repeat the Vinted UK check
 
