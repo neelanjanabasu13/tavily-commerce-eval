@@ -190,11 +190,69 @@ The open-web comparison covered four products. The Amazon UK pair tested one sho
 
 [All 16 original responses](runs/2026-11-24/raw/) · [Scores for all 80 results](runs/2026-11-24/scores.json) · [Request settings, timings and credits](runs/2026-11-24/collect.json)
 
-### How could Tavily improve the evidence available to a shopping assistant?
+## What product and API parameter do I propose?
 
-Give the assistant a product name or model, seller, price, currency and stock status, with the exact source words supporting each value. Let it return **“unknown”** for individual details. On Very’s result it could identify set 10329, link to the retailer and leave the price unknown. Include the time Tavily retrieved each page so the shopper can judge how recently the evidence was collected.
+I would start with developers building cross-retailer shopping and price-comparison assistants. Their immediate decision is whether they have enough evidence to tell a shopper, “This seller offers the exact version you asked for at this price.” I would initially support UK searches where the shopper already knows the product or specifies a pack size. For a question such as “What should I buy a gardener for Christmas?”, a gift guide may be a useful result in its own right. I would evaluate those discovery questions separately.
 
-To test that change, measure how often a result gives a usable UK offer with the right item, price and availability; how often a claim disagrees with the retailer; and how often a detail is marked unknown. Also track how much text the assistant has to read for each usable answer.
+### What would the developer request?
+
+I propose an optional parameter called `include_offer` on Tavily Search. A developer would set it to `true` when the assistant needs to quote a shopping offer. The default would be `false`. The example below illustrates the proposed interface.
+
+```json
+{
+  "query": "WaterWipes Original baby wipes 12 packs of 60 UK price",
+  "include_domains": ["amazon.co.uk"],
+  "include_offer": true
+}
+```
+
+Each result would retain its title, link and excerpt. An additional `offer` object would identify the displayed product and variant, units per pack, number of packs, seller, price, currency and availability when the source supports them. Each populated field would carry a reference to the source text or structured property that supports it. A per-result `fetched_at` would record when Tavily retrieved the source, including the original retrieval time for a cached page. A missing retrieval time would remain unknown.
+
+For example, Amazon UK’s third result in the WaterWipes search explicitly identified 12 packs of 60. The following illustrative response shows what the **saved excerpt alone** supports. Opening the product page could provide additional evidence.
+
+```json
+{
+  "offer": {
+    "brand": "WaterWipes",
+    "pack_count": 12,
+    "units_per_pack": 60,
+    "seller": null,
+    "price": null,
+    "currency": null,
+    "availability": null,
+    "evidence": {
+      "pack_count": "720 Wet Wipes (12 Packs of 60 Wipes)",
+      "units_per_pack": "720 Wet Wipes (12 Packs of 60 Wipes)"
+    }
+  },
+  "fetched_at": null
+}
+```
+
+A result on Amazon UK establishes the website. It takes separate evidence to identify the seller. Likewise, the assistant should quote a price only when the evidence ties it to the same product, pack and seller. For a Black Friday claim such as “30% off”, it would also need evidence for the reference price and any conditions on the discount. The first version would report the supported selling price and leave an unsupported discount unknown.
+
+### What would I build first?
+
+I would prototype offer extraction on the highest-ranked product pages while keeping their ranking fixed. I would first read the product and offer information that a merchant embeds in its page, then check whether the offer belongs to the requested variant. Some merchants identify variants and offers separately in their structured data. A price range covering several sellers cannot by itself establish the selling price for one seller. [Product variant documentation](https://developers.google.com/search/docs/appearance/structured-data/product-variants) · [Offer documentation](https://developers.google.com/search/docs/appearance/structured-data/product-snippet)
+
+The study establishes what was missing or ambiguous in the returned text. It does not establish whether the underlying page contained usable structured data, whether a particular extraction step discarded it, or what proportion of merchants the prototype would cover. I would inspect those pages before estimating coverage or engineering cost.
+
+My experience with quantity data at Amazon informs how I would handle variants. I would preserve the merchant’s original wording alongside a normalised quantity. Twelve packs of 60 gives a total of 720, but the total alone loses the pack configuration. Similarly, 454 grams describes mass and 16 fluid ounces describes volume. I would leave that comparison unresolved without product-specific evidence.
+
+I would handle the Vinted failure separately. An offer extractor cannot fix a result that already links to a single-brand catalogue. In a subsequent ranking experiment, I would test whether demoting brand-filtered catalogue URLs helps when a shopper explicitly requests results across brands. I would continue to allow individual listings from any brand.
+
+### How would I decide whether the feature earns its place in Search?
+
+I would compare three ways of answering the same questions: Search alone, Search followed by a targeted Extract request on the same URLs, and Search with the proposed offer parameter. Tavily Extract already accepts a query that prioritises relevant passages. For the WaterWipes example, the comparison request would ask for the seller, price and availability of the 12-pack of 60. I would have a reviewer record the selected variant and offer from the merchant page at the same time. The 310 seasonal results provide candidate questions for this evaluation and have not yet been scored. [Tavily Extract documentation](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
+
+| Measure | How I would calculate it |
+|---|---|
+| Can the assistant answer the question? | I would measure the proportion of shopping questions with at least one offer in the top five whose product, variant, seller, currency and price agree with the merchant page. When the shopper asks about stock, availability must also agree. |
+| How often does the assistant give a wrong answer? | Among offers the assistant quotes, I would measure the proportion with an incorrect product, variant, seller, price or required availability. I would report missing fields separately so returning unknown cannot disguise poor coverage. |
+| What does a usable answer cost? | I would divide total API credits and model input tokens by the number of questions answered correctly, and compare response times across the three approaches, including the slowest five per cent of requests. |
+
+I would proceed if the prototype answered more questions correctly at a comparable error rate, or achieved comparable accuracy with fewer requests, lower cost or shorter waits than Search followed by Extract. If targeted Extract performed equally well on those measures, I would publish that workflow for developers before investing in a dedicated commerce parameter.
+
 
 ## Individual search results
 
