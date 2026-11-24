@@ -194,6 +194,14 @@ The open-web comparison covered four products. The Amazon UK pair tested one sho
 
 I propose that developers should be able to ask Tavily for specific product attributes and for evidence that a product meets a shopper’s requirements. A comparison assistant may need to explain which vacuum cleaner suits a home with a shedding dog and carpeted floors. A purchasing assistant may also need to identify which seller has that exact model in stock within the shopper’s budget. Both tasks depend on identifying the product correctly, but they require different evidence.
 
+### Why would I prioritise the Vinted failure?
+
+The shopper asked to see women’s earmuffs in either of two new conditions, explicitly kept the brand open and asked to avoid single-brand pages. The first follow-up result linked to a Vinted catalogue whose URL contained `/brand/232-new-era`. That link narrows the shopper’s choice before an assistant reads any individual listing. I can establish which URL Tavily returned. I cannot establish how Tavily discovered it, whether Tavily maintains its own index of that page, or why it ranked first. My earlier observation of a SHEIN filter has a less complete record.
+
+My first prototype would check whether a candidate link applies filters that conflict with the request. For a catalogue, I would compare the requested filters with the filters evidenced by the destination URL and the visible page. If the user explicitly excludes single-brand catalogues, a catalogue confirmed to have that restriction should be ineligible for recommendation. An individual New Era listing can still qualify because the shopper left brands open. A general earmuffs catalogue could also be useful, although its condition filter needs a separate check. If I cannot verify that condition, the assistant should say so.
+
+I would use ordinary Google Search as a comparison. I would run the same wording at the same time against Vinted UK, using Google’s site restriction and Tavily’s domain restriction, record the first five organic links from each, and inspect their destination filters. I would then apply the proposed check to Tavily’s same five candidates to isolate its effect from changes in retrieval. I would report how often the first recommendation violates an explicit instruction, how often a qualifying destination is available in the top five, and how often the system returns no verified match. I have not run this Google comparison. Returning the same catalogue link would establish overlap on that query. It would not establish which service performs better across shopping queries.
+
 ### Which attributes would I support first?
 
 | Attribute | What I would return and why |
@@ -239,7 +247,7 @@ I would begin with exact product identity, the five attribute groups above and a
 
 My experience with quantity data at Amazon informs how I would compare variants. Twelve packs of 60 wipes and 720 loose wipes have the same count but different pack configurations. An assistant should retain both the total and its composition. It should also preserve units: a mass in grams cannot establish a volume in fluid ounces without additional product-specific information.
 
-The Vinted case raises a separate retrieval question. If a shopper explicitly asks to keep brands open, I would test demoting catalogues restricted to one brand while allowing individual branded listings. Better extraction from a New Era catalogue alone would still leave the shopper with an unnecessarily narrow selection.
+I would test attribute extraction alongside the destination-filter check. They answer different questions: whether a link respects the shopper’s instructions, and what the linked page establishes about a product.
 
 ### How would I evaluate it?
 
