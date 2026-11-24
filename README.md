@@ -205,6 +205,18 @@ The open-web comparison covered four products. The Amazon UK pair tested one sho
 
 I propose that developers should be able to ask Tavily for specific product attributes and for evidence that a product meets a shopper’s requirements. A comparison assistant may need to explain which vacuum cleaner suits a home with a shedding dog and carpeted floors. A purchasing assistant may also need to identify which seller has that exact model in stock within the shopper’s budget. Both tasks depend on identifying the product correctly, but they require different evidence.
 
+### How should shopping search handle the three cases?
+
+I propose an optional developer setting such as `intent: "shopping"`. When enabled, Tavily would inspect promising destinations, identify the selected product or catalogue filters, and return the facts a shopping assistant needs to answer the request. The following changes address different failures observed in this study.
+
+| Search | What happened and why I think it happened | What I would change |
+|---|---|---|
+| Dyson V8 battery | The tested query explicitly requested a genuine battery. Some returned pages established that a battery fit the V8 but left its manufacturer unclear. A compatibility claim can contain both “Dyson” and “V8” even when another company made the part. | I would extract the manufacturer, part number and supported V8 variants separately. For the broader query “Dyson V8 battery”, I would present Dyson-made options and compatible third-party options in two labelled groups. If the shopper explicitly asks for “genuine Dyson”, I would lead with confirmed Dyson-made options and identify any alternatives separately. |
+| Vinted earmuffs | The first follow-up link led to a catalogue already filtered to New Era. Its subject matched the query, but its active filter conflicted with the request to keep brands open. | I would inspect the destination’s active brand and condition filters. I would exclude single-brand catalogues when the shopper explicitly asks to avoid them. An individual branded listing could still qualify. |
+| Amazon UK baby wipes | Restricting the domain worked. Some results concerned other brands or pack sizes, and the excerpts did not establish a selling price for the requested pack. | I would read the selected brand, pack count and wipes per pack, then attach a seller, price and stock status only when the page ties them to that selection. |
+
+For Dyson, the assistant could say, “I found batteries made by Dyson and alternatives made by other manufacturers. Here are the V8 variants each one fits.” It could then list the seller, part number, price and evidence for each option. If a page gives no manufacturer, I would label it “manufacturer unconfirmed”. If compatibility depends on the machine’s serial number, the assistant should ask for the relevant prefix before recommending a particular battery. This broader wording is a proposed use case. The recorded test used the word “genuine”.
+
 ### Why would I prioritise the Vinted failure?
 
 The shopper asked to see women’s earmuffs in either of two new conditions, explicitly kept the brand open and asked to avoid single-brand pages. The first follow-up result linked to a Vinted catalogue whose URL contained `/brand/232-new-era`. That link narrows the shopper’s choice before an assistant reads any individual listing. I can establish which URL Tavily returned. I cannot establish how Tavily discovered it, whether Tavily maintains its own index of that page, or why it ranked first. My earlier observation of a SHEIN filter has a less complete record.
